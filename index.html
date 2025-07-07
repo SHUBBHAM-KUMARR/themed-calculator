@@ -1,431 +1,71 @@
-!
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Themed Calculator</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.2/math.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      padding: 20px;
-      transition: background 0.3s ease;
-      color: #fff;
-      background: #121212;
-      overflow-x: hidden;
-    }
-
-    body.regular {
-      background: #f0f0f0;
-      color: #000;
-    }
-
-    body.regular .calculator,
-    body.regular .history {
-      background: #fff;
-      color: #000;
-      border: 1px solid #ccc;
-    }
-
-    body.regular .display-box {
-      background: #f9f9f9;
-    }
-
-    body.regular .preview {
-      color: #666;
-    }
-
-    body.regular button {
-      background: #e0e0e0;
-      color: #000;
-    }
-
-    body.regular button:hover {
-      background: #ccc;
-    }
-
-    body.dark {
-      background: #1e1e2f;
-      color: #fff;
-    }
-
-    body.dark .calculator,
-    body.dark .history {
-      background: #2b2b3c;
-      color: #fff;
-    }
-
-    body.dark .display-box {
-      background: #111;
-      color: #0f0;
-    }
-
-    body.dark .preview {
-      color: #999;
-    }
-
-    body.dark button {
-      background: #3c3c4c;
-      color: #fff;
-    }
-
-    body.dark button:hover {
-      background: #505062;
-    }
-
-    body.glass {
-      background: url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
-      background-size: cover;
-      color: #fff;
-    }
-
-    body.glass .calculator,
-    body.glass .history {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    body.glass .display-box {
-      background: rgba(0,0,0,0.4);
-    }
-
-    body.glass .preview {
-      color: #ccc;
-    }
-
-    body.glass button {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-      backdrop-filter: blur(8px);
-    }
-
-    body.glass button:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .wrapper {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 20px;
-      width: 100%;
-      max-width: 900px;
-      height: 600px;
-      margin-top: 100px;
-    }
-
-    .calculator {
-      flex: 1;
-      height: 65%;
-      display: flex;
-      flex-direction: column;
-      min-width: 320px;
-    }
-
-    .history {
-      width: 260px;
-      height: 100%;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-
-    .top-bar {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .display-box {
-      padding: 10px 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .preview {
-      font-size: 1em;
-      text-align: right;
-      height: 20px;
-    }
-
-    .input-display {
-      font-size: 1.8em;
-      text-align: right;
-      word-break: break-word;
-      overflow-x: auto;
-    }
-
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-
-    button {
-      padding: 16px;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .clear { background: #dc3545; }
-    .backspace { background: #f39c12; }
-    .equal { background: #28a745; }
-    .operator { background: #007acc; }
-
-    .history h2 {
-      margin: 0 0 10px;
-      font-size: 1.2em;
-      border-bottom: 1px solid currentColor;
-      padding-bottom: 8px;
-    }
-
-    .history-entry {
-      font-size: 1em;
-      margin-bottom: 8px;
-      border-bottom: 1px solid currentColor;
-      padding-bottom: 4px;
-    }
-
-    .clear-history-btn {
-      margin-top: 10px;
-      background: #6c757d;
-      color: white;
-      padding: 8px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.9em;
-    }
-
-    .theme-switch {
-      display: inline-flex;
-      background: #333;
-      border-radius: 30px;
-      padding: 4px;
-      position: relative;
-      user-select: none;
-      overflow: hidden;
-    }
-
-    .theme-switch input[type="radio"] {
-      display: none;
-    }
-
-    .theme-switch label {
-      color: white;
-      padding: 8px 12px;
-      font-size: 1em;
-      cursor: pointer;
-      z-index: 2;
-    }
-
-    .theme-switch .slider {
-      position: absolute;
-      top: 4px;
-      bottom: 4px;
-      left: 4px;
-      width: calc(100% / 3 - 8px);
-      background: #007acc;
-      border-radius: 30px;
-      transition: transform 0.3s ease;
-      z-index: 1;
-    }
-
-    .theme-switch input#dark:checked ~ .slider { transform: translateX(0%); }
-    .theme-switch input#regular:checked ~ .slider { transform: translateX(100%); }
-    .theme-switch input#glass:checked ~ .slider { transform: translateX(200%); }
-
-    @media (max-width: 768px) {
-      .wrapper {
-        overflow-x: auto;
-        height: auto;
-        flex-wrap: nowrap;
-      }
-
-      .calculator {
-        min-width: 320px;
-        flex-shrink: 0;
-      }
-
-      .history {
-        min-width: 240px;
-        height: auto;
-      }
-
-      .top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .input-display { font-size: 1.5em; }
-      .preview { font-size: 0.9em; }
-      button { padding: 14px; font-size: 1em; }
-    }
-  </style>
 </head>
 <body class="dark">
 
-<div class="top-bar">
-  <div class="text-logo">🧮</div>
-  <div class="theme-switch">
-    <input type="radio" id="dark" name="theme" checked>
-    <label for="dark">🌙</label>
-    <input type="radio" id="regular" name="theme">
-    <label for="regular">☀️</label>
-    <input type="radio" id="glass" name="theme">
-    <label for="glass">🧊</label>
-    <span class="slider"></span>
-  </div>
-</div>
+  <!-- Top Bar: Logo & Theme Switch -->
+  <div class="top-bar">
+    <div class="text-logo">🧮</div>
+    <div class="theme-switch">
+      <input type="radio" id="dark" name="theme" checked>
+      <label for="dark">🌙</label>
 
-<div class="wrapper">
-  <div class="calculator">
-    <div class="display-box">
-      <div class="preview" id="preview"></div>
-      <div class="input-display" id="inputDisplay"></div>
-    </div>
-    <div class="buttons">
-      <button class="clear" style="grid-column: span 2;" onclick="clearDisplay()">C</button>
-      <button class="backspace" style="grid-column: span 2;" onclick="backspace()">⌫</button>
-      <button onclick="append('7')">7</button>
-      <button onclick="append('8')">8</button>
-      <button onclick="append('9')">9</button>
-      <button class="operator" onclick="append('÷')">÷</button>
-      <button onclick="append('4')">4</button>
-      <button onclick="append('5')">5</button>
-      <button onclick="append('6')">6</button>
-      <button class="operator" onclick="append('×')">×</button>
-      <button onclick="append('1')">1</button>
-      <button onclick="append('2')">2</button>
-      <button onclick="append('3')">3</button>
-      <button class="operator" onclick="append('-')">−</button>
-      <button onclick="append('0')">0</button>
-      <button onclick="append('.')">.</button>
-      <button class="equal" onclick="calculate()">=</button>
-      <button class="operator" onclick="append('+')">+</button>
+      <input type="radio" id="regular" name="theme">
+      <label for="regular">☀️</label>
+
+      <input type="radio" id="glass" name="theme">
+      <label for="glass">🧊</label>
+
+      <span class="slider"></span>
     </div>
   </div>
-  <div class="history">
-    <h2>History</h2>
-    <div id="historyList"></div>
-    <button class="clear-history-btn" onclick="clearHistory()">Clear History</button>
+
+  <!-- Calculator + History -->
+  <div class="wrapper">
+    <div class="calculator">
+      <div class="display-box">
+        <div class="preview" id="preview"></div>
+        <div class="input-display" id="inputDisplay"></div>
+      </div>
+      <div class="buttons">
+        <button class="clear" style="grid-column: span 2;" onclick="clearDisplay()">C</button>
+        <button class="backspace" style="grid-column: span 2;" onclick="backspace()">⌫</button>
+
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+        <button class="operator" onclick="append('÷')">÷</button>
+
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+        <button class="operator" onclick="append('×')">×</button>
+
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+        <button class="operator" onclick="append('-')">−</button>
+
+        <button onclick="append('0')">0</button>
+        <button onclick="append('.')">.</button>
+        <button class="equal" onclick="calculate()">=</button>
+        <button class="operator" onclick="append('+')">+</button>
+      </div>
+    </div>
+
+    <aside class="history">
+      <h2>History</h2>
+      <div id="historyList"></div>
+      <button class="clear-history-btn" onclick="clearHistory()">Clear History</button>
+    </aside>
   </div>
-</div>
 
-<script>
-  let currentExpression = '';
-  const inputDisplay = document.getElementById('inputDisplay');
-  const preview = document.getElementById('preview');
-  const historyList = document.getElementById('historyList');
-
-  function append(value) {
-    currentExpression += value;
-    inputDisplay.textContent = currentExpression;
-    updatePreview();
-  }
-
-  function clearDisplay() {
-    currentExpression = '';
-    inputDisplay.textContent = '';
-    preview.textContent = '';
-  }
-
-  function backspace() {
-    currentExpression = currentExpression.slice(0, -1);
-    inputDisplay.textContent = currentExpression;
-    updatePreview();
-  }
-
-  function calculate() {
-    const shown = currentExpression;
-    const safeExpression = currentExpression.replace(/×/g, '*').replace(/÷/g, '/');
-    try {
-      const result = math.evaluate(safeExpression);
-      currentExpression = result.toString();
-      inputDisplay.textContent = currentExpression;
-      preview.textContent = '';
-      addHistoryEntry(`${shown} = ${result}`);
-      saveHistory();
-    } catch {
-      preview.textContent = 'Invalid';
-    }
-  }
-
-  function updatePreview() {
-    const expr = currentExpression.replace(/×/g, '*').replace(/÷/g, '/');
-    try {
-      if (expr && /[0-9)]$/.test(expr)) {
-        preview.textContent = math.evaluate(expr);
-      } else {
-        preview.textContent = '';
-      }
-    } catch {
-      preview.textContent = '';
-    }
-  }
-
-  function addHistoryEntry(text) {
-    const entry = document.createElement('div');
-    entry.className = 'history-entry';
-    entry.textContent = text;
-    historyList.prepend(entry);
-  }
-
-  function saveHistory() {
-    const entries = Array.from(historyList.children).map(el => el.textContent);
-    localStorage.setItem('calc-history', JSON.stringify(entries));
-  }
-
-  function loadHistory() {
-    const saved = JSON.parse(localStorage.getItem('calc-history') || '[]');
-    saved.forEach(addHistoryEntry);
-  }
-
-  function clearHistory() {
-    historyList.innerHTML = '';
-    localStorage.removeItem('calc-history');
-  }
-
-  document.querySelectorAll('.theme-switch input').forEach(input => {
-    input.addEventListener('change', () => {
-      document.body.classList.remove('dark', 'regular', 'glass');
-      document.body.classList.add(input.id);
-    });
-  });
-
-  window.onload = loadHistory;
-
-  window.addEventListener('keydown', (e) => {
-    const key = e.key;
-    if (!isNaN(key) || ['+', '-', '*', '/', '.', '(', ')'].includes(key)) {
-      append(key === '*' ? '×' : key === '/' ? '÷' : key);
-    } else if (key === 'Enter') {
-      calculate();
-    } else if (key === 'Backspace') {
-      backspace();
-    } else if (key === 'Escape') {
-      clearDisplay();
-    }
-  });
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
