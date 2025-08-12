@@ -42,7 +42,7 @@ A stylish, multi-theme calculator built with **HTML**, **CSS**, and **JavaScript
  ![Regular Theme](./media/tlc2.png) 
 ---
 ## 📂 Folder Structure
-**themed-calculator/**
+> **themed-calculator/**
 **|**
 **|--index.html**
 **|---style.css**
